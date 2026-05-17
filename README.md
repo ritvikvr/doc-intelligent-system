@@ -1,4 +1,4 @@
-# doc-intet
+# doc-intelligent-system
 
 Document Intelligence System using FastAPI only (synchronous processing, no PostgreSQL/Redis/Celery).
 
