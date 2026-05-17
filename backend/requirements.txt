@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-multipart
+pydantic
+pytesseract
+Pillow
+faiss-cpu
+rank-bm25
+python-jose
+requests
+PyPDF2
+python-docx
+numpy

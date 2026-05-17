@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Intelligence Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-0: #08111e;
+            --bg-1: #0c1f33;
+            --bg-2: #0f2740;
+            --panel: rgba(9, 23, 40, 0.78);
+            --panel-strong: rgba(13, 31, 52, 0.9);
+            --border: rgba(146, 175, 205, 0.28);
+            --text-primary: #e8f1fb;
+            --text-secondary: #9cb4cc;
+            --text-muted: #7f97af;
+            --accent: #1d9bf0;
+            --accent-strong: #0077c8;
+            --success: #1fbf75;
+            --error: #ff5d6c;
+            --warning: #ffb347;
+            --shadow: 0 24px 45px rgba(0, 8, 20, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: "Source Sans 3", sans-serif;
+            color: var(--text-primary);
+            background:
+                radial-gradient(900px 420px at 12% -10%, rgba(33, 141, 218, 0.24), transparent 60%),
+                radial-gradient(800px 420px at 92% -8%, rgba(19, 126, 173, 0.22), transparent 58%),
+                linear-gradient(140deg, var(--bg-0) 0%, var(--bg-1) 45%, var(--bg-2) 100%);
+            overflow: hidden;
+        }
+
+        .app-shell {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        .topbar {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(144, 176, 208, 0.2);
+            background: rgba(6, 18, 31, 0.62);
+            backdrop-filter: blur(14px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .brand h1 {
+            font-family: "Manrope", sans-serif;
+            font-size: 1.32rem;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            color: #ebf6ff;
+        }
+
+        .brand p {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .status-badge {
+            padding: 0.42rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .status-badge.success {
+            color: #ddffee;
+            background: rgba(31, 191, 117, 0.2);
+            border-color: rgba(31, 191, 117, 0.42);
+        }
+
+        .status-badge.error {
+            color: #ffe6e9;
+            background: rgba(255, 93, 108, 0.2);
+            border-color: rgba(255, 93, 108, 0.42);
+        }
+
+        .workspace {
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 1rem;
+            min-height: 0;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            min-height: 0;
+            backdrop-filter: blur(14px);
+        }
+
+        .left-panel {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            min-width: 0;
+        }
+
+        .panel-head {
+            background: var(--panel-strong);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+        }
+
+        .panel-head h2 {
+            font-family: "Manrope", sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .panel-head p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .upload-section {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            margin-top: 0.85rem;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            font-family: "Manrope", sans-serif;
+            font-weight: 700;
+            font-size: 0.86rem;
+            color: white;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            padding: 0.62rem 0.95rem;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(0, 119, 200, 0.34);
+        }
+
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+            transform: none;
+            box-shadow: none;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .viewer {
+            position: relative;
+            background: linear-gradient(160deg, rgba(9, 24, 41, 0.9), rgba(11, 30, 50, 0.88));
+            min-height: 0;
+        }
+
+        #pdfViewer {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .empty-state {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem;
+        }
+
+        .empty-state h3 {
+            font-family: "Manrope", sans-serif;
+            font-size: 1.08rem;
+            margin-bottom: 0.35rem;
+            color: var(--text-secondary);
+        }
+
+        .right-panel {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            min-height: 0;
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.45rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            background: rgba(6, 18, 30, 0.52);
+        }
+
+        .tab {
+            text-align: center;
+            padding: 0.7rem 0.55rem;
+            border-radius: 10px;
+            font-family: "Manrope", sans-serif;
+            font-size: 0.84rem;
+            font-weight: 700;
+            letter-spacing: 0.25px;
+            color: var(--text-secondary);
+            background: rgba(153, 179, 203, 0.08);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .tab.active {
+            color: #eaf7ff;
+            background: rgba(17, 126, 191, 0.28);
+            border-color: rgba(56, 170, 237, 0.5);
+        }
+
+        .tab-content {
+            display: none;
+            min-height: 0;
+            overflow: hidden;
+            padding: 0.9rem;
+        }
+
+        .tab-content.active {
+            display: grid;
+            grid-template-rows: 1fr auto;
+            gap: 0.8rem;
+        }
+
+        .chat-container {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding-right: 0.15rem;
+        }
+
+        .message {
+            max-width: 90%;
+            padding: 0.85rem 0.95rem;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+            animation: fadeIn 0.22s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(145deg, rgba(30, 150, 226, 0.95), rgba(5, 104, 169, 0.95));
+            color: #f6fbff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background: rgba(150, 178, 203, 0.12);
+            border: 1px solid rgba(153, 179, 203, 0.25);
+            color: #e6f1fb;
+            border-bottom-left-radius: 4px;
+        }
+
+        .citations {
+            margin-top: 0.55rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+
+        .citation-tag {
+            font-size: 0.73rem;
+            font-weight: 600;
+            padding: 0.18rem 0.42rem;
+            border-radius: 6px;
+            border: 1px solid rgba(104, 160, 206, 0.4);
+            background: rgba(30, 84, 124, 0.36);
+            color: #c5e6ff;
+        }
+
+        .chat-input-area {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.55rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(146, 175, 205, 0.35);
+            background: rgba(8, 25, 43, 0.84);
+            color: #f1f8ff;
+            padding: 0.7rem 0.82rem;
+            font-size: 0.92rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: rgba(62, 173, 241, 0.66);
+            box-shadow: 0 0 0 3px rgba(39, 151, 221, 0.16);
+        }
+
+        .analysis-wrap {
+            display: grid;
+            grid-template-rows: auto auto 1fr auto auto;
+            gap: 0.7rem;
+            min-height: 0;
+        }
+
+        .analysis-wrap h3 {
+            font-family: "Manrope", sans-serif;
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #e9f4ff;
+        }
+
+        .analysis-wrap p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        .result-box {
+            border: 1px solid rgba(146, 175, 205, 0.32);
+            border-radius: 12px;
+            background: rgba(8, 25, 43, 0.88);
+            color: #d8e8f8;
+            font-size: 0.9rem;
+            line-height: 1.52;
+            padding: 0.9rem;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            min-height: 220px;
+        }
+
+        .download-controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.45rem;
+        }
+
+        .filename-input {
+            border-radius: 10px;
+            border: 1px solid rgba(146, 175, 205, 0.35);
+            background: rgba(8, 25, 43, 0.84);
+            color: #f1f8ff;
+            padding: 0.64rem 0.8rem;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.32);
+            border-top-color: #ffffff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(145, 175, 206, 0.35);
+            border-radius: 20px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(145, 175, 206, 0.55);
+        }
+
+        @media (max-width: 1160px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                grid-template-rows: minmax(300px, 1fr) minmax(360px, 0.9fr);
+                overflow: auto;
+            }
+
+            .right-panel {
+                min-height: 420px;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .topbar {
+                padding: 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .workspace {
+                padding: 0.75rem;
+                gap: 0.75rem;
+            }
+
+            .upload-section {
+                gap: 0.5rem;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .chat-input-area {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand">
+                <h1>Document Intelligence Command Center</h1>
+                <p>Professional analysis workspace for document insights, executive summaries, and AI-assisted Q&amp;A.</p>
+            </div>
+            <div class="status-row">
+                <span id="connectionStatus" class="status-badge">Checking API</span>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <section class="panel left-panel">
+                <div class="panel-head">
+                    <h2>Document Workspace</h2>
+                    <p>Upload, index, and review documents before running summary and advisory analysis.</p>
+                    <div class="upload-section">
+                        <input type="file" id="fileInput" accept=".pdf,.docx,.png,.jpg,.jpeg">
+                        <button class="btn" onclick="document.getElementById('fileInput').click()">Select Document</button>
+                        <button class="btn" id="uploadBtn" onclick="uploadDocument()" disabled>Upload and Process</button>
+                        <span id="uploadStatus" class="status-badge" style="display:none;"></span>
+                    </div>
+                </div>
+
+                <div class="viewer">
+                    <div id="emptyState" class="empty-state">
+                        <div>
+                            <h3>No Document Preview Yet</h3>
+                            <p>Select a PDF to preview it here. Other supported file types will still be processed.</p>
+                        </div>
+                    </div>
+                    <object id="pdfViewer" type="application/pdf" style="display:none;"></object>
+                </div>
+            </section>
+
+            <aside class="panel right-panel">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('chat', this)">Advisory Chat</button>
+                    <button class="tab" onclick="switchTab('analysis', this)">Summary Studio</button>
+                </div>
+
+                <div id="chatTab" class="tab-content active">
+                    <div class="chat-container" id="chatContainer">
+                        <div class="message assistant">Welcome. Upload a document and ask a business or technical question to receive a client-ready response.</div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="questionInput" placeholder="Ask for executive insights, risks, impacts, or next steps..." onkeypress="handleKeyPress(event)">
+                        <button class="btn" id="sendBtn" onclick="sendQuestion()">Send</button>
+                    </div>
+                </div>
+
+                <div id="analysisTab" class="tab-content">
+                    <div class="analysis-wrap">
+                        <h3>Client-Ready Summary</h3>
+                        <p>Generate a structured summary suitable for professional IT and stakeholder communication.</p>
+                        <button class="btn" id="summaryBtn" onclick="getSummary()">Generate Summary</button>
+                        <div id="summaryResult" class="result-box">Run a summary to populate executive findings, business impact, and recommended next steps.</div>
+                        <div class="download-controls">
+                            <input type="text" id="summaryFilenameInput" class="filename-input" placeholder="summary.txt" value="summary.txt">
+                            <button class="btn" id="downloadSummaryBtn" onclick="downloadSummary()" disabled>Download Summary</button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        const sessionId = "session_" + Math.random().toString(36).substr(2, 9);
+
+        let selectedFile = null;
+        let currentSummary = "";
+
+        const fileInput = document.getElementById("fileInput");
+        const uploadBtn = document.getElementById("uploadBtn");
+        const uploadStatus = document.getElementById("uploadStatus");
+        const pdfViewer = document.getElementById("pdfViewer");
+        const emptyState = document.getElementById("emptyState");
+        const chatContainer = document.getElementById("chatContainer");
+        const questionInput = document.getElementById("questionInput");
+        const sendBtn = document.getElementById("sendBtn");
+        const summaryBtn = document.getElementById("summaryBtn");
+        const summaryResult = document.getElementById("summaryResult");
+        const downloadSummaryBtn = document.getElementById("downloadSummaryBtn");
+        const summaryFilenameInput = document.getElementById("summaryFilenameInput");
+        const connectionStatus = document.getElementById("connectionStatus");
+
+        async function checkApiHealth() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                if (!response.ok) throw new Error("Health endpoint unavailable");
+                connectionStatus.textContent = "API Connected";
+                connectionStatus.className = "status-badge success";
+            } catch (error) {
+                connectionStatus.textContent = "API Offline";
+                connectionStatus.className = "status-badge error";
+            }
+        }
+
+        fileInput.addEventListener("change", (e) => {
+            if (e.target.files.length === 0) return;
+            selectedFile = e.target.files[0];
+            uploadBtn.disabled = false;
+
+            if (selectedFile.type === "application/pdf") {
+                const fileURL = URL.createObjectURL(selectedFile);
+                pdfViewer.data = fileURL;
+                pdfViewer.style.display = "block";
+                emptyState.style.display = "none";
+            } else {
+                pdfViewer.style.display = "none";
+                emptyState.style.display = "grid";
+                emptyState.innerHTML = `<div><h3>Preview Not Available</h3><p>${selectedFile.name} will still be processed and indexed for analysis.</p></div>`;
+            }
+        });
+
+        async function uploadDocument() {
+            if (!selectedFile) return;
+
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="loading"></span> Processing';
+
+            try {
+                const response = await fetch(`${API_URL}/upload`, {
+                    method: "POST",
+                    body: formData,
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus("Document processed successfully.", "success");
+                    appendMessage("assistant", "Document indexing completed. You can now request a client-ready summary or ask advisory questions.");
+                } else {
+                    showStatus(`Error: ${data.detail || "Upload failed"}`, "error");
+                }
+            } catch (error) {
+                showStatus("Connection error during upload.", "error");
+                console.error(error);
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = "Upload and Process";
+            }
+        }
+
+        function showStatus(text, type) {
+            uploadStatus.textContent = text;
+            uploadStatus.className = `status-badge ${type}`;
+            uploadStatus.style.display = "inline-flex";
+            setTimeout(() => {
+                uploadStatus.style.display = "none";
+            }, 4500);
+        }
+
+        function switchTab(tabId, tabButton) {
+            document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach((content) => content.classList.remove("active"));
+
+            tabButton.classList.add("active");
+            document.getElementById(`${tabId}Tab`).classList.add("active");
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendQuestion();
+            }
+        }
+
+        async function sendQuestion() {
+            const question = questionInput.value.trim();
+            if (!question) return;
+
+            appendMessage("user", question);
+            questionInput.value = "";
+            questionInput.disabled = true;
+            sendBtn.innerHTML = '<span class="loading"></span>';
+
+            try {
+                const response = await fetch(`${API_URL}/query`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        question,
+                        session_id: sessionId,
+                        use_groq: true,
+                    }),
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    appendMessage("assistant", data.answer, data.citations || []);
+                } else {
+                    appendMessage("assistant", `Error: ${data.detail || "Unable to generate response."}`);
+                }
+            } catch (error) {
+                appendMessage("assistant", "Connection error. Please try again.");
+                console.error(error);
+            } finally {
+                questionInput.disabled = false;
+                sendBtn.innerHTML = "Send";
+                questionInput.focus();
+            }
+        }
+
+        function appendMessage(role, text, citations = []) {
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `message ${role}`;
+            msgDiv.textContent = text;
+
+            if (Array.isArray(citations) && citations.length > 0) {
+                const citationsDiv = document.createElement("div");
+                citationsDiv.className = "citations";
+                citations.forEach((citation) => {
+                    const tag = document.createElement("span");
+                    tag.className = "citation-tag";
+                    tag.textContent = citation;
+                    citationsDiv.appendChild(tag);
+                });
+                msgDiv.appendChild(citationsDiv);
+            }
+
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function getSummary() {
+            summaryBtn.innerHTML = '<span class="loading"></span> Generating';
+            summaryResult.textContent = "Preparing client-ready summary...";
+
+            try {
+                const response = await fetch(`${API_URL}/summary`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentSummary = data.summary || "";
+                    summaryResult.textContent = currentSummary;
+                    downloadSummaryBtn.disabled = !currentSummary.trim();
+                } else {
+                    currentSummary = "";
+                    downloadSummaryBtn.disabled = true;
+                    summaryResult.textContent = `Error: ${data.detail || "Failed to generate summary."}`;
+                }
+            } catch (error) {
+                currentSummary = "";
+                downloadSummaryBtn.disabled = true;
+                summaryResult.textContent = "Connection error while generating summary.";
+            } finally {
+                summaryBtn.innerHTML = "Generate Summary";
+            }
+        }
+
+        function downloadSummary() {
+            const text = currentSummary.trim();
+            if (!text) return;
+
+            const filename = summaryFilenameInput.value.trim() || "summary.txt";
+            const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        checkApiHealth();
+    </script>
+</body>
+</html>
